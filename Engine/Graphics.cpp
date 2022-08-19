@@ -327,6 +327,11 @@ void Graphics::DrawRect(int left, int top, int right, int bottom, Color c)
 	}
 }
 
+void Graphics::DrawRectDim(int pos_x, int pos_y, int width, int height, Color c)
+{
+	DrawRect(pos_x, pos_y, pos_x + width, pos_y + height, c);
+}
+
 //////////////////////////////////////////////////
 //           Graphics Exception
 Graphics::Exception::Exception( HRESULT hr,const std::wstring& note,const wchar_t* file,unsigned int line )

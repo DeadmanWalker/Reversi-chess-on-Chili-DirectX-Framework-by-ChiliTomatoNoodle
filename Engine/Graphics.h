@@ -58,6 +58,8 @@ public:
 	void PutPixel( int x,int y,Color c );
 
 	void DrawRect(int left, int top, int right, int bottom, Color c);
+
+	void DrawRectDim(int pos_x, int pos_y, int width, int height, Color c);
 	
 	~Graphics();
 private:
