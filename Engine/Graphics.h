@@ -60,6 +60,8 @@ public:
 	void DrawRect(int left, int top, int right, int bottom, Color c);
 
 	void DrawRectDim(int pos_x, int pos_y, int width, int height, Color c);
+
+	void DrawCircle(int cen_x, int cen_y, int radius, Color c);
 	
 	~Graphics();
 private:
