@@ -39,6 +39,7 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	brd.PlacePiece(wnd.mouse);
 }
 
 void Game::ComposeFrame()
