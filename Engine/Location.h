@@ -2,6 +2,7 @@
 
 struct Location
 {
+	Location() = default;
 	Location(int in_x, int in_y)
 	{
 		x = in_x;
