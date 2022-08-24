@@ -11,10 +11,11 @@ public:
 	void DrawBoard(Graphics& gfx) const;
 	Board();
 	void ResetBoard();
-	void PlacePiece(const Mouse& mouse);
+	void Control(const Mouse& mouse);
 private:
 	void DrawCell(Graphics& gfx) const;
 	void DrawPiece(Graphics& gfx, Location loc, int id) const;
+	void PlacePiece(Location loc, int id);
 	int HashFunc(Location loc, int id);
 	Location DeHashFunc(int hash);
 private:
