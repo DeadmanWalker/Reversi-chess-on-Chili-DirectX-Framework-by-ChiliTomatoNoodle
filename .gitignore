@@ -246,3 +246,6 @@ ModelManifest.xml
 
 # Precompiled Shader Header Files
 *.shh
+
+*.vcxproj
+*.vcxproj.filters
