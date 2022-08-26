@@ -18,4 +18,8 @@ struct Location
 	{
 		return ((x == rhs.x) && (y == rhs.y));
 	}
+	Location operator*(const int rhs) const
+	{
+		return { rhs * x,rhs * y };
+	}
 };
