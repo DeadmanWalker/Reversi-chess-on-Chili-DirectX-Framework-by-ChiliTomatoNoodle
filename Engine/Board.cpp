@@ -3,6 +3,17 @@
 
 const int player1_id = 1;
 const int player2_id = 2;
+Location direction[8] =
+{
+	{ -1,1 },
+	{ 0,1 },
+	{ 1,1 },
+	{ -1,0 },
+	{ 1,0 },
+	{ -1,-1 },
+	{ 0,-1 },
+	{ 1,-1 }
+};
 
 void Board::DrawBoard(Graphics & gfx) const
 {
@@ -14,6 +25,8 @@ void Board::DrawBoard(Graphics & gfx) const
 		DrawPiece(gfx, selected_cell, 2 - curr_turn % 2);
 	}
 	
+	DrawValidMove(gfx);
+
 	for (int i = 0; i < width; ++i)
 	{
 		for (int j = 0; j < height; ++j)
@@ -49,22 +62,32 @@ void Board::ResetBoard()
 	PlacePiece({ width / 2 - 1,height / 2 - 1 }, player1_id);
 	PlacePiece({ width / 2 - 1,height / 2 }, player2_id);
 	PlacePiece({ width / 2,height / 2 - 1 }, player2_id);
+
+	updateValidMove(1);
 }
 
 void Board::Control(const Mouse & mouse)
 {
 	draw_ghost_piece = false;
-	if (mouse.GetPosX() - pos_x >= 0 && (mouse.GetPosX() - pos_x) / cell_dim < width
-		&& mouse.GetPosY() - pos_y >= 0 && (mouse.GetPosY() - pos_y) / cell_dim < height)
+	Location temp = { (mouse.GetPosX() - pos_x) / cell_dim, (mouse.GetPosY() - pos_y) / cell_dim };
+	if (!valid_move_hash.empty())
 	{
-		draw_ghost_piece = true;
-		int curr_player = 2 - curr_turn % 2;
-		selected_cell = { (mouse.GetPosX() - pos_x) / cell_dim, (mouse.GetPosY() - pos_y) / cell_dim };
-		if (pre_mouse_input && !mouse.LeftIsPressed() && cells[selected_cell.x][selected_cell.y] == 0)
+		if (checkValidSelect(temp))
 		{
-			PlacePiece(selected_cell, curr_player);
-			++curr_turn;
+			draw_ghost_piece = true;
+			int curr_player = 2 - curr_turn % 2;
+			selected_cell = temp;
+			if (pre_mouse_input && !mouse.LeftIsPressed() && cells[selected_cell.x][selected_cell.y] == 0)
+			{
+				PlacePiece(selected_cell, curr_player);
+				++curr_turn;
+				updateValidMove(2 - curr_turn % 2);
+			}
 		}
+	}
+	else
+	{
+		++curr_turn;
 	}
 
 	pre_mouse_input = mouse.LeftIsPressed();
@@ -92,15 +115,82 @@ void Board::DrawPiece(Graphics & gfx, Location loc, int id) const
 void Board::PlacePiece(Location loc, int id)
 {
 	cells[loc.x][loc.y] = id;
-	cell_hash.push_back(HashFunc(loc, id));
+	cell_hash.push_back(HashFunc(loc));
 }
 
-int Board::HashFunc(Location loc, int id)
+int Board::HashFunc(Location loc) const
 {
-	return (1 - 2 * ((2 - curr_turn % 2) == 2)) * (width * loc.y + loc.x + 1);
+	return (width * loc.y + loc.x + 1);
 }
 
-Location Board::DeHashFunc(int hash)
+Location Board::DeHashFunc(int hash) const
 {
-	return Location((abs(hash) - 1) % width, (abs(hash) - 1) / width);
+	return Location((hash - 1) % width, (hash - 1) / width);
+}
+
+void Board::checkForMove(Location loc, int id)
+{
+	for (int i = 0; i < 8; ++i)
+	{
+		Location temp = loc + direction[i];
+		if (cells[temp.x][temp.y] != id && cells[temp.x][temp.y] != 0)
+		{
+			while(isInBound(temp))
+			{
+
+				if (cells[temp.x][temp.y] == 0)
+				{
+					valid_move_hash.push_back(HashFunc(temp));
+					break;
+				}
+				else if (cells[temp.x][temp.y] == id)
+				{
+					break;
+				}
+				temp = temp + direction[i];
+			}
+		}
+	}
+}
+
+bool Board::isInBound(Location loc)
+{
+	return loc.x >= 0 && loc.x < width && loc.y >= 0 && loc.y < height;
+}
+
+void Board::updateValidMove(int id)
+{
+	valid_move_hash.clear();
+	for (int i = 0; i < cell_hash.size(); ++i)
+	{
+		Location temp = DeHashFunc(cell_hash[i]);
+		if (cells[temp.x][temp.y] == id)
+		{
+			checkForMove(temp, id);
+		}
+
+	}
+}
+
+void Board::DrawValidMove(Graphics & gfx) const
+{
+	for (int i = 0; i < valid_move_hash.size(); ++i)
+	{
+		Location temp = DeHashFunc(valid_move_hash[i]);
+		int offset_x = pos_x + cell_dim / 2;
+		int offset_y = pos_y + cell_dim / 2;
+		gfx.DrawCircle(offset_x + temp.x * cell_dim, offset_y + temp.y * cell_dim, 5, Colors::Green);
+	}
+}
+
+bool Board::checkValidSelect(Location loc) const
+{
+	for (int i = 0; i < valid_move_hash.size(); ++i)
+	{
+		if (HashFunc(loc) == valid_move_hash[i])
+		{
+			return true;
+		}
+	}
+	return false;
 }

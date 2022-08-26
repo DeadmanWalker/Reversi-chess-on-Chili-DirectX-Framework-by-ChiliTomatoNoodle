@@ -8,16 +8,21 @@
 class Board
 {
 public:
-	void DrawBoard(Graphics& gfx) const;
 	Board();
+	void DrawBoard(Graphics& gfx) const;
 	void ResetBoard();
 	void Control(const Mouse& mouse);
 private:
 	void DrawCell(Graphics& gfx) const;
 	void DrawPiece(Graphics& gfx, Location loc, int id) const;
 	void PlacePiece(Location loc, int id);
-	int HashFunc(Location loc, int id);
-	Location DeHashFunc(int hash);
+	int HashFunc(Location loc) const;
+	Location DeHashFunc(int hash) const;
+	void checkForMove(Location loc, int id);
+	bool isInBound(Location loc);
+	void updateValidMove(int id);
+	void DrawValidMove(Graphics& gfx) const;
+	bool checkValidSelect(Location loc) const;
 private:
 	static constexpr int height = 8;
 	static constexpr int width = 8;
@@ -31,6 +36,7 @@ private:
 
 	int cells[width][height];
 	std::vector<int> cell_hash;
+	std::vector<int> valid_move_hash;
 	Location selected_cell;
 	int curr_turn = 1;
 	bool pre_mouse_input = false;
