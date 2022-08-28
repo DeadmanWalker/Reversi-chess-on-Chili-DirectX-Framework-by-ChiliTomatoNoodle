@@ -23,6 +23,7 @@ private:
 	void updateValidMove(int id);
 	void DrawValidMove(Graphics& gfx) const;
 	bool checkValidSelect(Location loc) const;
+	void takePieces(Location loc, int id);
 private:
 	static constexpr int height = 8;
 	static constexpr int width = 8;
@@ -41,4 +42,5 @@ private:
 	int curr_turn = 1;
 	bool pre_mouse_input = false;
 	bool draw_ghost_piece = true;
+	std::vector<int> move_direction[65];
 };

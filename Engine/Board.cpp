@@ -80,6 +80,7 @@ void Board::Control(const Mouse & mouse)
 			if (pre_mouse_input && !mouse.LeftIsPressed() && cells[selected_cell.x][selected_cell.y] == 0)
 			{
 				PlacePiece(selected_cell, curr_player);
+				takePieces(selected_cell, curr_player);
 				++curr_turn;
 				updateValidMove(2 - curr_turn % 2);
 			}
@@ -88,6 +89,7 @@ void Board::Control(const Mouse & mouse)
 	else
 	{
 		++curr_turn;
+		updateValidMove(2 - curr_turn % 2);
 	}
 
 	pre_mouse_input = mouse.LeftIsPressed();
@@ -141,6 +143,7 @@ void Board::checkForMove(Location loc, int id)
 				if (cells[temp.x][temp.y] == 0)
 				{
 					valid_move_hash.push_back(HashFunc(temp));
+					move_direction[HashFunc(temp)].push_back(i);
 					break;
 				}
 				else if (cells[temp.x][temp.y] == id)
@@ -193,4 +196,24 @@ bool Board::checkValidSelect(Location loc) const
 		}
 	}
 	return false;
+}
+
+void Board::takePieces(Location loc, int id)
+{
+	std::vector<int> take_direct = move_direction[HashFunc(loc)];
+	for (int i = 0; i < take_direct.size(); ++i)
+	{
+		Location temp = loc + direction[take_direct[i]] * -1;
+		while (cells[temp.x][temp.y] != id)
+		{
+			if (cells[temp.x][temp.y] == id)
+				break;
+			cells[temp.x][temp.y] = id;
+			temp = temp + direction[take_direct[i]] * -1;
+		}
+	}
+	for (int i = 1; i < 65; ++i)
+	{
+		move_direction[i].clear();
+	}
 }
