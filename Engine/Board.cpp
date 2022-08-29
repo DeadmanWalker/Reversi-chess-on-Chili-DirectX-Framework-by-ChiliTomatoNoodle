@@ -19,6 +19,8 @@ void Board::DrawBoard(Graphics & gfx) const
 {
 	gfx.DrawRectDim(pos_x, pos_y, width * cell_dim, height * cell_dim, bg_color);
 	DrawCell(gfx);
+
+	DrawPreTake(gfx);
 	
 	if (draw_ghost_piece)
 	{
@@ -79,6 +81,7 @@ void Board::Control(const Mouse & mouse)
 			selected_cell = temp;
 			if (pre_mouse_input && !mouse.LeftIsPressed() && cells[selected_cell.x][selected_cell.y] == 0)
 			{
+				pre_selected_cell = temp;
 				PlacePiece(selected_cell, curr_player);
 				takePieces(selected_cell, curr_player);
 				++curr_turn;
@@ -143,7 +146,7 @@ void Board::checkForMove(Location loc, int id)
 				if (cells[temp.x][temp.y] == 0)
 				{
 					valid_move_hash.push_back(HashFunc(temp));
-					move_direction[HashFunc(temp)].push_back(i);
+					take_direction[HashFunc(temp)].push_back(i);
 					break;
 				}
 				else if (cells[temp.x][temp.y] == id)
@@ -200,20 +203,37 @@ bool Board::checkValidSelect(Location loc) const
 
 void Board::takePieces(Location loc, int id)
 {
-	std::vector<int> take_direct = move_direction[HashFunc(loc)];
+	std::vector<int> take_direct = take_direction[HashFunc(loc)];
+	pre_take_hash.clear();
+
 	for (int i = 0; i < take_direct.size(); ++i)
 	{
 		Location temp = loc + direction[take_direct[i]] * -1;
+		pre_take_hash.push_back(HashFunc(temp));
 		while (cells[temp.x][temp.y] != id)
 		{
-			if (cells[temp.x][temp.y] == id)
-				break;
 			cells[temp.x][temp.y] = id;
 			temp = temp + direction[take_direct[i]] * -1;
+			pre_take_hash.push_back(HashFunc(temp));
 		}
 	}
 	for (int i = 1; i < 65; ++i)
 	{
-		move_direction[i].clear();
+		take_direction[i].clear();
+	}
+}
+
+void Board::DrawPreTake(Graphics & gfx) const
+{
+	if (curr_turn > 1)
+	{
+		gfx.DrawRectDim(pos_x + pre_selected_cell.x * cell_dim + cell_offset, pos_y + pre_selected_cell.y * cell_dim + cell_offset,
+			cell_dim - 2 * cell_offset, cell_dim - 2 * cell_offset, Colors::Blue);
+	}
+	for (int i = 0; i < pre_take_hash.size(); ++i)
+	{
+		Location temp = DeHashFunc(pre_take_hash[i]);
+		gfx.DrawRectDim(pos_x + temp.x * cell_dim + cell_offset, pos_y + temp.y * cell_dim + cell_offset,
+			cell_dim - 2 * cell_offset, cell_dim - 2 * cell_offset, Colors::Cyan);
 	}
 }

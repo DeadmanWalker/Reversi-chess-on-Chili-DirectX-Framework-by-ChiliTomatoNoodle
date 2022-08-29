@@ -24,6 +24,7 @@ private:
 	void DrawValidMove(Graphics& gfx) const;
 	bool checkValidSelect(Location loc) const;
 	void takePieces(Location loc, int id);
+	void DrawPreTake(Graphics& gfx) const;
 private:
 	static constexpr int height = 8;
 	static constexpr int width = 8;
@@ -42,5 +43,7 @@ private:
 	int curr_turn = 1;
 	bool pre_mouse_input = false;
 	bool draw_ghost_piece = true;
-	std::vector<int> move_direction[65];
+	std::vector<int> take_direction[65];
+	std::vector<int> pre_take_hash;
+	Location pre_selected_cell;
 };
